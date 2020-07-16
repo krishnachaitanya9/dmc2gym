@@ -99,17 +99,15 @@ class DMCWrapper(core.Env):
         return getattr(self._env, name)
 
     def _get_obs(self, time_step):
-        if self._from_pixels:
-            obs = self.render(
-                height=self._height,
-                width=self._width,
-                camera_id=self._camera_id
-            )
-            if self._channels_first:
-                obs = obs.transpose(2, 0, 1).copy()
-        else:
-            obs = _flatten_obs(time_step.observation)
-        return obs
+        obs = self.render(
+            height=self._height,
+            width=self._width,
+            camera_id=self._camera_id
+        )
+        if self._channels_first:
+            obs_image = obs.transpose(2, 0, 1).copy()
+        obs_state_space = _flatten_obs(time_step.observation)
+        return obs_image, obs_state_space
 
     def _convert_action(self, action):
         action = action.astype(np.float64)
@@ -150,16 +148,16 @@ class DMCWrapper(core.Env):
             done = time_step.last()
             if done:
                 break
-        obs = self._get_obs(time_step)
+        obs_image, obs_state_space = self._get_obs(time_step)
         self.current_state = _flatten_obs(time_step.observation)
         extra['discount'] = time_step.discount
-        return obs, reward, done, extra
+        return obs_image, obs_state_space, reward, done, extra
 
     def reset(self):
         time_step = self._env.reset()
         self.current_state = _flatten_obs(time_step.observation)
-        obs = self._get_obs(time_step)
-        return obs
+        obs_image, obs_state_space = self._get_obs(time_step)
+        return obs_image, obs_state_space
 
     def render(self, mode='rgb_array', height=None, width=None, camera_id=0):
         assert mode == 'rgb_array', 'only support rgb_array mode, given %s' % mode
