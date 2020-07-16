@@ -8,7 +8,7 @@ A lightweight wrapper around the DeepMind Control Suite that provides the standa
 
 ### Installation using SSH
 ```
-pip install --upgrade git@github.com:krishnachaitanya9/dmc2gym.git
+pip install --upgrade git+ssh://git@github.com:krishnachaitanya9/dmc2gym.git
 ```
 
 ### Usage
